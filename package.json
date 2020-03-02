@@ -1,5 +1,5 @@
 {
-  "name": "initials-react",
+  "name": "@airmeet/react-initial",
   "version": "1.0.6",
   "description": "react component to make Gmail like text avatars for profile pictures",
   "keywords": [
@@ -38,10 +38,11 @@
       "lcov"
     ]
   },
-  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
   "repository": {
-    "url": "git@github.com:airmeet/react-initial.git",
-    "type": "git"
+    "url": "https://github.com/airmeet/react-initial.git"
   },
   "bugs": {
     "url": "https://github.com/airmeet/react-initial/issues"
