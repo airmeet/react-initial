@@ -1,13 +1,13 @@
 {
-  "name": "react-initial",
-  "version": "1.0.5",
+  "name": "initials-react",
+  "version": "1.0.6",
   "description": "react component to make Gmail like text avatars for profile pictures",
   "keywords": [
     "react",
     "initial",
     "avatar"
   ],
-  "author": "Bruno Carvalho de Araujo <brunocarvalhodearaujo@gmail.com>",
+  "author": "Varshneya Rao <varshneya@airmeet.com>",
   "license": "MIT",
   "typings": "index.d.ts",
   "main": "lib/index.js",
@@ -38,11 +38,12 @@
       "lcov"
     ]
   },
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
   "repository": {
-    "url": "https://github.com/brunocarvalhodearaujo/react-initial.git",
+    "url": "git@github.com:airmeet/react-initial.git",
     "type": "git"
   },
   "bugs": {
-    "url": "https://github.com/brunocarvalhodearaujo/react-initial/issues"
+    "url": "https://github.com/airmeet/react-initial/issues"
   }
 }
