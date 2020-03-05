@@ -1,7 +1,7 @@
 // @flow
 import React, {
   Component,
-  type CSSProperties
+  CSSProperties
 } from 'react'
 import PropTypes from 'prop-types'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -52,6 +52,97 @@ type Props = {
   useWords?: boolean
 }
 
+const unicodeCharAt = (string: string, index: number): string => {
+  const first = string.charCodeAt(index)
+  let second
+
+  if (first >= 0xD800 && first <= 0xDBFF && string.length > index + 1) {
+    second = string.charCodeAt(index + 1)
+
+    if (second >= 0xDC00 && second <= 0xDFFF) {
+      return string.substring(index, index + 2)
+    }
+  }
+
+  return string[ index ]
+}
+
+const unicodeSlice = (string: string, start: number, end: number, words: boolean): string => {
+  let accumulator = ''
+  let character
+  let stringIndex = 0
+  let unicodeIndex = 0
+  let nextSpace = -1
+  let length = string.length
+
+  // Remove any leading/trailing spaces
+  string = string.trim()
+
+  while (stringIndex < length) {
+    character = unicodeCharAt(string, stringIndex)
+
+    if (unicodeIndex >= start && unicodeIndex < end) {
+      accumulator += character
+    } else {
+      break;
+    }
+
+    stringIndex += character.length
+    unicodeIndex += 1
+
+    // Find the next space offset from the previous finding
+    nextSpace = words ? string.indexOf(' ', nextSpace + 1) : -1
+    stringIndex = nextSpace > 0 ? nextSpace + 1 : stringIndex
+  }
+
+  return accumulator
+}
+
+export const getSvgString = (props) => {
+  const { width, height, textColor, fontFamily, fontSize, fontWeight, radius: borderRadius, ...ownProps } = props
+  const initial = unicodeSlice(props.name || 'Name', 0, props.charCount || 1, props.useWords || false).toUpperCase()
+  const backgroundColor = props.color !== null
+    ? props.color
+    : colors[ Math.floor((initial.charCodeAt(0) + props.seed) % colors.length) ]
+
+  const InitialSvg = () => (
+    <svg
+      xmlns='http://www.w3.org/2000/svg'
+      pointerEvents='none'
+      {...{
+        width,
+        height,
+        style: {
+          width,
+          height,
+          backgroundColor,
+          borderRadius
+        }
+      }}>
+      <text
+        y='50%'
+        x='50%'
+        dy='0.35em'
+        pointerEvents='auto'
+        fill={textColor}
+        fontFamily={fontFamily}
+        textAnchor='middle'
+        style={{ fontSize, fontWeight }}
+        children={initial} />
+    </svg>
+  )
+
+  return 'data:image/svg+xml;base64,' + btoa(
+    unescape(
+      encodeURIComponent(
+        renderToStaticMarkup(
+          <InitialSvg />
+        )
+      )
+    )
+  )
+}
+
 export default class Initial extends Component<Props> {
   static propTypes = {
     className: PropTypes.string,
@@ -83,95 +174,8 @@ export default class Initial extends Component<Props> {
     radius: 0
   }
 
-  unicodeCharAt (string: string, index: number): string {
-    const first = string.charCodeAt(index)
-    let second
-
-    if (first >= 0xD800 && first <= 0xDBFF && string.length > index + 1) {
-      second = string.charCodeAt(index + 1)
-
-      if (second >= 0xDC00 && second <= 0xDFFF) {
-        return string.substring(index, index + 2)
-      }
-    }
-
-    return string[ index ]
-  }
-
-  unicodeSlice (string: string, start: number, end: number, words: boolean): string {
-    let accumulator = ''
-    let character
-    let stringIndex = 0
-    let unicodeIndex = 0
-    let nextSpace = -1
-    let length = string.length
-
-    // Remove any leading/trailing spaces
-    string = string.trim()
-
-    while (stringIndex < length) {
-      character = this.unicodeCharAt(string, stringIndex)
-
-      if (unicodeIndex >= start && unicodeIndex < end) {
-        accumulator += character
-      } else {
-        break;
-      }
-
-      stringIndex += character.length
-      unicodeIndex += 1
-
-      // Find the next space offset from the previous finding
-      nextSpace = words ? string.indexOf(' ', nextSpace + 1) : -1
-      stringIndex = nextSpace > 0 ? nextSpace + 1 : stringIndex
-    }
-
-    return accumulator
-  }
-
   render () {
-    const { width, height, textColor, fontFamily, fontSize, fontWeight, radius: borderRadius, ...ownProps } = this.props
-    const initial = this.unicodeSlice(this.props.name || 'Name', 0, this.props.charCount || 1, this.props.useWords || false).toUpperCase()
-    const backgroundColor = this.props.color !== null
-      ? this.props.color
-      : colors[ Math.floor((initial.charCodeAt(0) + this.props.seed) % colors.length) ]
-
-    const InitialSvg = () => (
-      <svg
-        xmlns='http://www.w3.org/2000/svg'
-        pointerEvents='none'
-        {...{
-          width,
-          height,
-          style: {
-            width,
-            height,
-            backgroundColor,
-            borderRadius
-          }
-        }}>
-        <text
-          y='50%'
-          x='50%'
-          dy='0.35em'
-          pointerEvents='auto'
-          fill={textColor}
-          fontFamily={fontFamily}
-          textAnchor='middle'
-          style={{ fontSize, fontWeight }}
-          children={initial} />
-      </svg>
-    )
-
-    const svgHtml: string = 'data:image/svg+xml;base64,' + btoa(
-      unescape(
-        encodeURIComponent(
-          renderToStaticMarkup(
-            <InitialSvg />
-          )
-        )
-      )
-    )
+    const svgHtml: string = getSvgString();
 
     return (
       <img
@@ -182,3 +186,4 @@ export default class Initial extends Component<Props> {
     )
   }
 }
+

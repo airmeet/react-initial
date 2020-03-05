@@ -1,1 +1,1 @@
-export { default, default as Initial } from './Initial'
+export { default, default as Initial, getSvgString } from './Initial'
