@@ -36,9 +36,6 @@
       "lcov"
     ]
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  },
   "repository": {
     "url": "https://github.com/airmeet/react-initial.git"
   },
