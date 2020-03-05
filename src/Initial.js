@@ -1,12 +1,22 @@
-// @flow
-import React, {
-  Component,
-  CSSProperties
-} from 'react'
-import PropTypes from 'prop-types'
-import { renderToStaticMarkup } from 'react-dom/server'
+import PropTypes from 'prop-types';
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 
-const colors: string[] = [
+const DEFUALT_PROPS = {
+  name: 'Name',
+  color: null,
+  seed: 0,
+  charCount: 1,
+  textColor: '#ffffff',
+  height: 100,
+  width: 100,
+  fontSize: 60,
+  fontWeight: 400,
+  fontFamily: 'HelveticaNeue-Light, Helvetica Neue Light, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif',
+  radius: 0
+};
+
+const colors = [
   '#1abc9c',
   '#16a085',
   '#f1c40f',
@@ -35,24 +45,7 @@ const colors: string[] = [
   '#a94136'
 ]
 
-type Props = {
-  className?: string,
-  style?: CSSProperties,
-  name?: string,
-  color?: ?string,
-  seed?: number,
-  charCount?: number,
-  textColor?: string,
-  height?: number,
-  width?: number,
-  fontSize?: number,
-  fontWeight?: number,
-  fontFamily?: string,
-  radius?: number,
-  useWords?: boolean
-}
-
-const unicodeCharAt = (string: string, index: number): string => {
+const unicodeCharAt = (string, index) => {
   const first = string.charCodeAt(index)
   let second
 
@@ -64,10 +57,10 @@ const unicodeCharAt = (string: string, index: number): string => {
     }
   }
 
-  return string[ index ]
+  return string[index]
 }
 
-const unicodeSlice = (string: string, start: number, end: number, words: boolean): string => {
+const unicodeSlice = (string, start, end, words) => {
   let accumulator = ''
   let character
   let stringIndex = 0
@@ -98,12 +91,13 @@ const unicodeSlice = (string: string, start: number, end: number, words: boolean
   return accumulator
 }
 
-export const getSvgString = (props) => {
-  const { width, height, textColor, fontFamily, fontSize, fontWeight, radius: borderRadius, ...ownProps } = props
+export const getSvgString = (inProps, buffer) => {
+  const props = { ...DEFUALT_PROPS, ...inProps };
+  const { width, height, textColor, fontFamily, fontSize, fontWeight, radius: borderRadius } = props
   const initial = unicodeSlice(props.name || 'Name', 0, props.charCount || 1, props.useWords || false).toUpperCase()
   const backgroundColor = props.color !== null
     ? props.color
-    : colors[ Math.floor((initial.charCodeAt(0) + props.seed) % colors.length) ]
+    : colors[Math.floor((initial.charCodeAt(0) + props.seed) % colors.length)]
 
   const InitialSvg = () => (
     <svg
@@ -132,58 +126,41 @@ export const getSvgString = (props) => {
     </svg>
   )
 
-  return 'data:image/svg+xml;base64,' + btoa(
-    unescape(
-      encodeURIComponent(
-        renderToStaticMarkup(
-          <InitialSvg />
-        )
+  const escaped = unescape(
+    encodeURIComponent(
+      renderToStaticMarkup(
+        <InitialSvg />
       )
     )
+  );
+
+  return `data:image/svg+xml;base64,${buffer ? buffer.from(escaped).toString('base64') : btoa(escaped)}`;
+}
+
+export default function Initial({ alt, ...props }) {
+  const svgHtml = getSvgString(props);
+
+  return (
+    <img
+      src={svgHtml}
+      alt={alt || ''}
+    />
   )
 }
 
-export default class Initial extends Component<Props> {
-  static propTypes = {
-    className: PropTypes.string,
-    style: PropTypes.object,
-    name: PropTypes.string,
-    color: PropTypes.string,
-    seed: PropTypes.number,
-    charCount: PropTypes.number,
-    textColor: PropTypes.string,
-    height: PropTypes.number,
-    width: PropTypes.number,
-    fontSize: PropTypes.number,
-    fontWeight: PropTypes.number,
-    fontFamily: PropTypes.string,
-    radius: PropTypes.number
-  }
-
-  static defaultProps = {
-    name: 'Name',
-    color: null,
-    seed: 0,
-    charCount: 1,
-    textColor: '#ffffff',
-    height: 100,
-    width: 100,
-    fontSize: 60,
-    fontWeight: 400,
-    fontFamily: 'HelveticaNeue-Light, Helvetica Neue Light, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif',
-    radius: 0
-  }
-
-  render () {
-    const svgHtml: string = getSvgString();
-
-    return (
-      <img
-        {...ownProps}
-        src={svgHtml}
-        alt=''
-      />
-    )
-  }
+Initial.propTypes = {
+  className: PropTypes.string,
+  style: PropTypes.object,
+  name: PropTypes.string,
+  color: PropTypes.string,
+  seed: PropTypes.number,
+  charCount: PropTypes.number,
+  textColor: PropTypes.string,
+  height: PropTypes.number,
+  width: PropTypes.number,
+  fontSize: PropTypes.number,
+  fontWeight: PropTypes.number,
+  fontFamily: PropTypes.string,
+  radius: PropTypes.number,
+  alt: PropTypes.string
 }
-
