@@ -137,6 +137,26 @@ export const getSvgString = (inProps, buffer) => {
   return `data:image/svg+xml;base64,${buffer ? buffer.from(escaped).toString('base64') : btoa(escaped)}`;
 }
 
+export const getPngString = (inProps, buffer) => {
+  return new Promise((resolve, reject)=>{
+    let svgString = getSvgString(inProps, buffer);
+    var canvas = document.createElement( "canvas" );
+    var ctx = canvas.getContext( "2d" );
+
+    var img = document.createElement( "img" );
+    img.setAttribute( "src", svgString );
+
+    img.onload = function() {
+        ctx.drawImage( img, 0, 0 );
+        resolve(canvas.toDataURL( "image/png" ))
+    };
+
+    img.onError = function(err) {
+      reject(err);
+    }
+  });
+}
+
 export default function Initial({ alt, ...props }) {
   const svgHtml = getSvgString(props);
 
