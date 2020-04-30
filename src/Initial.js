@@ -105,19 +105,19 @@ export const getSvgString = (inProps, buffer) => {
       pointerEvents='none'
       {...{
         width,
-        height,
-        style: {
-          width,
-          height,
-          backgroundColor,
-          borderRadius
-        }
+        height
       }}>
+      <rect
+        width="100%"
+        height="100%"
+        fill={backgroundColor}
+        border-radius={borderRadius}
+      />
       <text
         y='50%'
         x='50%'
         dy='0.35em'
-        pointerEvents='auto'
+        pointerEvents='none'
         fill={textColor}
         fontFamily={fontFamily}
         textAnchor='middle'
